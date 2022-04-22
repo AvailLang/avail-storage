@@ -38,8 +38,8 @@ plugins {
     publishing
 }
 
-group = "org.example"
-version = "1.0-SNAPSHOT"
+group = "org.availlang"
+version = "1.0.7"
 
 val junitVersion = "5.8.2"
 val jvmTarget = 11
