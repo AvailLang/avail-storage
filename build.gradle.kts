@@ -39,7 +39,7 @@ plugins {
 }
 
 group = "org.availlang"
-version = "1.0.7"
+version = "1.0.8"
 
 val junitVersion = "5.8.2"
 val jvmTarget = 11

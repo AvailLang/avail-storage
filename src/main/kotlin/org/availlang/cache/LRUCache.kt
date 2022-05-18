@@ -204,8 +204,8 @@ class LRUCache<K, V> @JvmOverloads constructor(
 	 *   The capacity of the [map][SoftCacheMap].
 	 */
 	internal inner class SoftCacheMap constructor(
-		private val capacity: Int) : LinkedHashMap<K, SoftReference<V>>(
-			capacity, 0.75f, true)
+		private val capacity: Int
+	) : LinkedHashMap<K, SoftReference<V>>(capacity, 0.75f, true)
 	{
 		override fun removeEldestEntry(
 			eldest: MutableMap.MutableEntry<K, SoftReference<V>>?): Boolean
@@ -293,7 +293,7 @@ class LRUCache<K, V> @JvmOverloads constructor(
 
 		override fun isDone() = isDone
 
-		@Throws(RuntimeException::class)
+		@Throws(CacheException::class)
 		override fun get(): V?
 		{
 			// Because the completion flag is volatile and one-way, we can
@@ -311,9 +311,10 @@ class LRUCache<K, V> @JvmOverloads constructor(
 			}
 
 			// If an exception was set, then we now rethrow that exception.
-			if (exception !== null)
+			val ex = exception
+			if (ex !== null)
 			{
-				throw RuntimeException(exception)
+				throw CacheInsertException(ex)
 			}
 
 			return result
@@ -456,8 +457,8 @@ class LRUCache<K, V> @JvmOverloads constructor(
 	 * key.
 	 *
 	 * TODO: This needs to become getThen(), to prevent a race with retirement
-	 * for a resource still actively in use (like a file handle that might get
-	 * closed automatically by a retirement action).
+	 *  for a resource still actively in use (like a file handle that might get
+	 *  closed automatically by a retirement action).
 	 *
 	 * @param key
 	 *   The key whose associated value should be answered.

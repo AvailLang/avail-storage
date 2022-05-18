@@ -46,7 +46,9 @@ arguments:
    the specified key, computing the value from user-supplied `transformer` 
    if the value is not already present in the cache. **NOTE** This function 
    is not reentrant; the `transformer` must not reenter any public operation 
-   while computing a value for a specified key.
+   while computing a value for a specified key. If there is an exception thrown 
+   when running the transformer, a `CacheInsertException` will be thrown. The  
+   `CacheInsertException` will contain the original exception as its `cause`.
  * `poll(K): V?` - Immediately answers the value already associated with the
    specified key. This does not execute the user-supplied `transformer`, only 
    answers an already cached value or `null` if
