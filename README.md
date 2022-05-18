@@ -36,7 +36,18 @@ arguments:
  3. `transformer` (`(K) -> V`) - The function responsible for producing new
     values from user supplied keys.
  4. `retirementAction` (`((K, V) -> Unit)?`) - The nullable action responsible
-    for retiring a binding expired from the `LRUCache`.
+    for retiring a binding expired from the `LRUCache`. This is run everytime
+    a value is removed from the `LRUCache`. Depending on the value type being
+    stored in the cache, an object retrieved from the cache and held onto by 
+    another process may have the object removed from the cache. When this 
+    happens this `retirementAction` will be run even though the value may be in 
+    active use. For resources such as files and streams that may be closable, if
+    the retirement action closes the resource, this could lead to exceptions 
+    for resources that are still in use but have been removed from the 
+    `LRUCache`. For these kinds of resources, it is recommended that the 
+    resource be wrapped in an object that tracks whether the object has been 
+    marked for removal or have state added to it to track whether 
+    the resource has been marked for removal. 
 
 ### Functions and Public State
  * `clear()` - Completely clears the caching forcing a run of the retirement 
