@@ -468,7 +468,7 @@ class LRUCache<K, V> @JvmOverloads constructor(
 	 *   If an exception occurred as a result of an error in the execution of
 	 *   the user-supplied [Function].
 	 */
-	@Throws(RuntimeException::class)
+	@Throws(CacheInsertException::class)
 	operator fun get(key: K): V
 	{
 		lock.lock()
