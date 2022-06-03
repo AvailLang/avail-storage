@@ -39,13 +39,13 @@ plugins {
 }
 
 group = "org.availlang"
-version = "1.0.8"
+version = "1.0.9-SNAPSHOT"
 
 val junitVersion = "5.8.2"
 val jvmTarget = 11
 val jvmTargetString = jvmTarget.toString()
 val kotlinLanguage = "1.6"
-val availJsonVersion = "1.0.7"
+val availJsonVersion = "1.1.0"
 
 java {
     toolchain {
@@ -61,11 +61,7 @@ kotlin {
 }
 
 repositories {
-    mavenLocal()
     mavenCentral()
-    maven {
-        url = uri("${rootProject.rootDir}/libs/")
-    }
 }
 
 dependencies {
