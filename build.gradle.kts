@@ -234,10 +234,6 @@ publishing {
                         id.set("leslieATAvail")
                         name.set("Leslie Schultz")
                     }
-                    developer {
-                        id.set("markATAvail")
-                        name.set("Mark van Gulik")
-                    }
                 }
             }
             val sourceJar = tasks.getByName("sourceJar") as Jar

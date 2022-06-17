@@ -39,11 +39,10 @@ import org.availlang.persistence.test.TestDocument.Companion.record2
 import org.availlang.persistence.test.TestDocument.Companion.record3
 import org.availlang.persistence.test.TestDocument.Companion.record4
 import org.availlang.persistence.test.TestIndexedFileBuilder.testDirectory
-import org.junit.jupiter.api.AfterAll
+import org.availlang.persistence.tools.fileanalyzer.IndexedFileAnalyzer
+import org.availlang.persistence.tools.fileanalyzer.configuration.IndexedFileAnalyzerConfiguration
+import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.BeforeAll
-import org.junit.jupiter.api.DisplayName
-import org.junit.jupiter.api.Test
 import java.io.File
 
 /**
@@ -51,9 +50,12 @@ import java.io.File
  *
  * @author Richard Arriaga &lt;rich@availlang.org&gt;
  */
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 class IndexedFileTest
 {
     @Test
+    @Order(1)
     @DisplayName("Normal Page Size")
     internal fun test ()
     {
@@ -103,6 +105,7 @@ class IndexedFileTest
     }
 
     @Test
+    @Order(2)
     @DisplayName("Small Page Size")
     internal fun testSmallPageSize ()
     {
@@ -175,10 +178,29 @@ class IndexedFileTest
         assertEquals(record4, TestDocument.deserialize(record4RetrievedBytes))
     }
 
+    @Test
+    @Order(3)
+    @DisplayName("Indexed File Analyzer Test")
+    internal fun testAnalyzer ()
+    {
+        val testFile = File("$testDirectory/test_file.cap")
+        val config = IndexedFileAnalyzerConfiguration().apply {
+            inputFile = testFile
+            counts = true
+            sizes = true
+            binary = true
+            text = true
+            metadata = true
+        }
+        val analyzer = IndexedFileAnalyzer(config)
+        analyzer.analyze(System.out)
+    }
+
 	companion object
 	{
 		@BeforeAll
 		@JvmStatic
+        @Suppress("unused")
 		fun initialize ()
 		{
 			val dir = File(testDirectory)
@@ -190,6 +212,7 @@ class IndexedFileTest
 
 		@AfterAll
 		@JvmStatic
+        @Suppress("unused")
 		fun cleanup ()
 		{
 			File(testDirectory).deleteRecursively()
