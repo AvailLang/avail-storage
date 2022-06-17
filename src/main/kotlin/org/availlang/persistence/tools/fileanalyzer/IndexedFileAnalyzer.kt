@@ -217,9 +217,7 @@ class IndexedFileAnalyzer constructor(
 					}
 				}
 				text -> output.append(record.toString(UTF_8))
-				else ->
-				{
-				}
+				else -> {}
 			}
 		}
 	}
