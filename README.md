@@ -1,5 +1,6 @@
 Avail Storage
 ===============================================================================
+[![Maven Central](https://img.shields.io/badge/maven--central-v1.0.10-0f824e)](https://search.maven.org/artifact/org.availlang/avail-storage)
 
 *TODO THIS IS A WORK IN PROGRESS*
 
