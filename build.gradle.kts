@@ -1,6 +1,6 @@
 /*
  * build.gradle.kts
- * Copyright © 1993-2021, The Avail Foundation, LLC.
+ * Copyright © 1993-2022, The Avail Foundation, LLC.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -42,7 +42,7 @@ plugins {
 }
 
 group = "org.availlang"
-version = "1.1.0-SNAPSHOT"
+version = "1.1.0"
 
 val isReleaseVersion =
     !version.toString().toUpperCaseAsciiOnly().endsWith("SNAPSHOT")
