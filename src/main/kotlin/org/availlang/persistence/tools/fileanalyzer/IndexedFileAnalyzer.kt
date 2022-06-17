@@ -108,7 +108,7 @@ class IndexedFileAnalyzer constructor(
 	 * of indices of records in the file that fall between the optionally
 	 * specified bounds of the [configuration].
 	 */
-	private val indices: LongRange
+	val indices: LongRange
 
 	init
 	{
@@ -141,38 +141,40 @@ class IndexedFileAnalyzer constructor(
 		startIndex: Long,
 		totalSize: Long,
 		bytes: ByteArray,
-		output: PrintStream)
+		rowAcceptor: (String) -> Unit)
 	{
-		with(output) {
-			assert(configuration.binary)
-			val format = when
-			{
-				totalSize > 0x10000000 -> "%016X: "
-				totalSize > 0x1000 -> "%08X: "
-				else -> "%04X: "
-			}
-			format(format, startIndex)
-			for (i in 0..15)
-			{
-				if (i == 8) append(" ")  // River into two groups of 8.
-				if (i < bytes.size) format(" %02X", bytes[i].toInt() and 0xFF)
-				else append(" --")
-			}
-			if (configuration.text)
-			{
-				append("  ")
-				bytes.forEachIndexed { i, b ->
-					if (i == 8) append(" ")  // River into two groups of 8.
-					append(
-						when (b)
-						{
-							in 0x20..0x7E -> b.toInt().toChar()
-							else -> '.'
-						})
+		rowAcceptor(
+			buildString {
+				assert(configuration.binary)
+				val format = when
+				{
+					totalSize > 0x10000000 -> "%016X: "
+					totalSize > 0x1000 -> "%08X: "
+					else -> "%04X: "
 				}
-			}
-			append('\n')
-		}
+				String.format(format, startIndex)
+				for (i in 0..15)
+				{
+					if (i == 8) append(" ")  // River into two groups of 8.
+					if (i < bytes.size)
+						String.format(" %02X", bytes[i].toInt() and 0xFF)
+					else append(" --")
+				}
+				if (configuration.text)
+				{
+					append("  ")
+					bytes.forEachIndexed { i, b ->
+						if (i == 8) append(" ")  // River into two groups of 8.
+						append(
+							when (b)
+							{
+								in 0x20..0x7E -> b.toInt().toChar()
+								else -> '.'
+							})
+					}
+				}
+				append('\n')
+		})
 	}
 
 	/**
@@ -181,17 +183,18 @@ class IndexedFileAnalyzer constructor(
 	 */
 	private fun writeRecord(
 		recordNumber: Long,
-		output: PrintStream)
+		recordAcceptor: (String) -> Unit)
 	{
 		val record: ByteArray = when (recordNumber)
 		{
 			-1L -> indexedFile.metadata ?: return
 			else -> indexedFile[recordNumber]
 		}
+		val sb = StringBuilder()
 		with(configuration) {
 			if (counts)
 			{
-				output.append(
+				sb.append(
 					when (recordNumber)
 					{
 						-1L -> "Metadata\n"
@@ -200,7 +203,7 @@ class IndexedFileAnalyzer constructor(
 			}
 			if (sizes)
 			{
-				output.append("Size=${record.size}\n")
+				sb.append("Size=${record.size}\n")
 			}
 			when
 			{
@@ -213,10 +216,10 @@ class IndexedFileAnalyzer constructor(
 							record.size.toLong(),
 							record.sliceArray(
 								start..min(start + 15, record.size - 1)),
-							output)
+							recordAcceptor)
 					}
 				}
-				text -> output.append(record.toString(UTF_8))
+				text -> sb.append(record.toString(UTF_8))
 				else -> {}
 			}
 		}
@@ -279,7 +282,18 @@ class IndexedFileAnalyzer constructor(
 	 * @param output
 	 *   The [PrintStream] to write analysis results to.
 	 */
-	fun analyze (output: PrintStream)
+	fun analyze (output: PrintStream) =
+		analyze { output.append(it) }
+
+	/**
+	 * Analyze the [indexedFile] writing the results of the analysis to the
+	 * provided [PrintStream].
+	 *
+	 * @param recordAcceptor
+	 *   The lambda that accepts a constructed record string that reports on
+	 *   an IndexedFile record from the file.
+	 */
+	fun analyze (recordAcceptor: (String) -> Unit)
 	{
 		with(configuration) {
 			when
@@ -356,9 +370,9 @@ class IndexedFileAnalyzer constructor(
 				{
 					// Output a stream of records.
 					indices.forEach {
-						writeRecord(it, output)
+						writeRecord(it, recordAcceptor)
 					}
-					if (metadata) writeRecord(-1L, output)
+					if (metadata) writeRecord(-1L, recordAcceptor)
 				}
 			}
 		}

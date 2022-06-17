@@ -48,7 +48,7 @@ import java.lang.IllegalStateException
  * A builder used to create new [IndexedFile]s that are meant to contain
  * [TestDocument]s.
  */
-object TestIndexedFileBuilder: IndexedFileBuilder("Test Indexed File\u0000")
+object TestIndexedFileBuilder: IndexedFileBuilder("Test Indexed File")
 {
 	fun create (backingFileName: String): IndexedFile =
 		openOrCreate(
