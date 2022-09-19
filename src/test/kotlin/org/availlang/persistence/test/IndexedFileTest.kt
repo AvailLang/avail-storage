@@ -102,6 +102,7 @@ class IndexedFileTest
         val record4RetrievedBytes = reopenIndexedFile[fourthIndex]
         assert(record4Serialized.contentEquals(record4RetrievedBytes))
         assertEquals(record4, TestDocument.deserialize(record4RetrievedBytes))
+        reopenIndexedFile.close()
     }
 
     @Test
@@ -176,6 +177,7 @@ class IndexedFileTest
         val record4RetrievedBytes = reopenIndexedFile[fifthIndex]
         assert(record4Serialized.contentEquals(record4RetrievedBytes))
         assertEquals(record4, TestDocument.deserialize(record4RetrievedBytes))
+        reopenIndexedFile.close()
     }
 
     @Test
@@ -194,6 +196,7 @@ class IndexedFileTest
         }
         val analyzer = IndexedFileAnalyzer(config)
         analyzer.analyze(System.out)
+        analyzer.close()
     }
 
 	companion object
@@ -204,10 +207,12 @@ class IndexedFileTest
 		fun initialize ()
 		{
 			val dir = File(testDirectory)
-			if (!dir.exists())
+			if (dir.exists())
 			{
-				dir.mkdir()
+                // Ensure no state is left over from a previous test.
+				dir.deleteRecursively()
 			}
+            dir.mkdir()
 		}
 
 		@AfterAll

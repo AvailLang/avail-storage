@@ -42,7 +42,7 @@ plugins {
 }
 
 group = "org.availlang"
-version = "1.1.0"
+version = "1.1.1"
 
 val isReleaseVersion =
     !version.toString().toUpperCaseAsciiOnly().endsWith("SNAPSHOT")

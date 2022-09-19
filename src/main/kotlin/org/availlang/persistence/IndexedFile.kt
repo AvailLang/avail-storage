@@ -635,8 +635,8 @@ class IndexedFile internal constructor(
 	 * memory and then written to a temporary file. Once the header and master
 	 * blocks have been written, the argument [action] is
 	 * performed. Finally the temporary file is renamed to the canonical
-	 * filename. When the call returns, [file] and [channel] are live and a
-	 * write lock is held on the physical indexed file.
+	 * filename. When the call returns, [file] and [channel] are live but there
+	 * will ***not*** be a write lock on the physical indexed file.
 	 *
 	 * @param action
 	 *   An action to perform after the header and master blocks have been
@@ -679,7 +679,6 @@ class IndexedFile internal constructor(
 		assert(buffer.position().toLong() == fileLimit)
 		buffer.rewind()
 		master = m
-
 		try
 		{
 			// Transfer the buffer to a temporary file. Perform the nullary
@@ -687,21 +686,35 @@ class IndexedFile internal constructor(
 			val tempFilename = File.createTempFile(
 				"new indexed file", null, fileReference.parentFile)
 			tempFilename.deleteOnExit()
+			val tempExistingSpuriousFile = file
+			// For the time being the tempFilename is the target of all file
+			// operations
 			file = RandomAccessFile(tempFilename, "rw")
 			assert(file.length() == 0L) { "The file is not empty." }
 			file.setLength(pageSize * 100L)
 			longTermWriterLock = acquireLockForWriting()
+			// No need to refresh, because other processes shouldn't be writing
+			// to our temp file.
 			channel.write(buffer)
 			channel.force(true)
 			this.action()
-			longTermWriterLock!!.close()
+			// It is permitted to call commit() in the body of action() called
+			// on the previous line, doing so would already have closed and
+			// placed null in longTermWriterLock. So we only peform a close on
+			// longTermWriterLock if it has not already been set to `null`.
+			longTermWriterLock?.close()
 			longTermWriterLock = null
 			channel.close()
 
 			// Rename the temporary file to the canonical target name.
+			tempExistingSpuriousFile.close()
 			if (!tempFilename.renameTo(fileReference))
 			{
-				throw IOException("rename failed")
+				fileReference.delete()
+				if (!tempFilename.renameTo(fileReference))
+				{
+					throw IOException("rename failed")
+				}
 			}
 			file = RandomAccessFile(fileReference, "rw")
 		}
@@ -1280,6 +1293,7 @@ class IndexedFile internal constructor(
 		 * @param byteStream
 		 *   The [ByteArrayOutputStream] to read and append to.
 		 */
+		@Suppress("unused")
 		fun appendCRC(byteStream: ByteArrayOutputStream)
 		{
 			val checksum = CRC32()
@@ -1302,6 +1316,7 @@ class IndexedFile internal constructor(
 		 * @throws MalformedSerialStreamException
 		 *   If the CRC check fails.
 		 */
+		@Suppress("unused")
 		@Throws(MalformedSerialStreamException::class)
 		fun validatedBytesFrom(bytes: ByteArray): ByteArrayInputStream
 		{

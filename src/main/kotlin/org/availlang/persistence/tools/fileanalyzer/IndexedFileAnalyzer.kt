@@ -276,6 +276,14 @@ class IndexedFileAnalyzer constructor(
 	}
 
 	/**
+	 * Close the backing [indexedFile].
+	 */
+	fun close ()
+	{
+		indexedFile.close()
+	}
+
+	/**
 	 * Analyze the [indexedFile] writing the results of the analysis to the
 	 * provided [PrintStream].
 	 *
