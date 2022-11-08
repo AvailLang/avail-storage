@@ -50,7 +50,7 @@ val junitVersion = "5.8.2"
 val jvmTarget = 11
 val jvmTargetString = jvmTarget.toString()
 val kotlinLanguage = "1.6"
-val availJsonVersion = "1.1.1"
+val availJsonVersion = "1.2.0"
 
 java {
     toolchain {
